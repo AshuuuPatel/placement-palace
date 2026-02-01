@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { CreateJobDialog } from "@/components/jobs/CreateJobDialog";
+import { CompanyJobsList } from "@/components/jobs/CompanyJobsList";
 import { 
   Users, 
   Briefcase, 
@@ -25,6 +27,13 @@ const CompanyDashboard = () => {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [stats, setStats] = useState({
+    activeJobs: 0,
+    applications: 0,
+    interviews: 0,
+    offers: 0,
+  });
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (!loading && role && role !== "company") {
@@ -34,22 +43,71 @@ const CompanyDashboard = () => {
 
   useEffect(() => {
     if (user) {
-      supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("user_id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) setProfile(data);
-        });
+      fetchProfile();
+      fetchStats();
     }
   }, [user]);
 
-  const stats = [
-    { label: "Active Job Postings", value: "0", icon: Briefcase, color: "text-accent" },
-    { label: "Applications Received", value: "0", icon: FileText, color: "text-success" },
-    { label: "Interviews Scheduled", value: "0", icon: Calendar, color: "text-warning" },
-    { label: "Offers Extended", value: "0", icon: Send, color: "text-accent" },
+  async function fetchProfile() {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (data) setProfile(data);
+  }
+
+  async function fetchStats() {
+    if (!user) return;
+    try {
+      // Fetch active job count
+      const { data: jobsData } = await supabase
+        .from("job_postings")
+        .select("id")
+        .eq("company_id", user.id)
+        .eq("status", "active");
+
+      const activeJobs = jobsData?.length || 0;
+
+      // Fetch application count for company's jobs
+      const { data: allJobs } = await supabase
+        .from("job_postings")
+        .select("id")
+        .eq("company_id", user.id);
+
+      const jobIds = allJobs?.map((j) => j.id) || [];
+      
+      let applications = 0;
+      if (jobIds.length > 0) {
+        const { data: appsData } = await supabase
+          .from("job_applications")
+          .select("id")
+          .in("job_id", jobIds);
+        applications = appsData?.length || 0;
+      }
+
+      setStats({
+        activeJobs,
+        applications,
+        interviews: 0,
+        offers: 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }
+
+  function handleJobCreated() {
+    setRefreshTrigger((prev) => prev + 1);
+    fetchStats();
+  }
+
+  const statsData = [
+    { label: "Active Job Postings", value: String(stats.activeJobs), icon: Briefcase, color: "text-accent" },
+    { label: "Applications Received", value: String(stats.applications), icon: FileText, color: "text-success" },
+    { label: "Interviews Scheduled", value: String(stats.interviews), icon: Calendar, color: "text-warning" },
+    { label: "Offers Extended", value: String(stats.offers), icon: Send, color: "text-accent" },
   ];
 
   return (
@@ -57,9 +115,14 @@ const CompanyDashboard = () => {
       title={`Welcome, ${profile?.full_name || "Recruiter"}!`}
       subtitle="Find and hire the best campus talent"
     >
+      {/* Header with Create Job button */}
+      <div className="flex justify-end mb-6">
+        <CreateJobDialog onJobCreated={handleJobCreated} />
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat) => (
+        {statsData.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -76,59 +139,9 @@ const CompanyDashboard = () => {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-2">
-              <Briefcase className="w-6 h-6 text-accent" />
-            </div>
-            <CardTitle className="text-lg">Post Job</CardTitle>
-            <CardDescription>Create new job listings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">Create</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-2">
-              <Search className="w-6 h-6 text-success" />
-            </div>
-            <CardTitle className="text-lg">Talent Pool</CardTitle>
-            <CardDescription>Browse student profiles</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">Search</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-2">
-              <Calendar className="w-6 h-6 text-warning" />
-            </div>
-            <CardTitle className="text-lg">Interviews</CardTitle>
-            <CardDescription>Schedule campus visits</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">Schedule</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-2">
-              <ClipboardList className="w-6 h-6 text-accent" />
-            </div>
-            <CardTitle className="text-lg">Applications</CardTitle>
-            <CardDescription>Review candidates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">Review</Button>
-          </CardContent>
-        </Card>
+      {/* Job Postings List */}
+      <div className="mb-8">
+        <CompanyJobsList refreshTrigger={refreshTrigger} />
       </div>
 
       {/* Activity Sections */}

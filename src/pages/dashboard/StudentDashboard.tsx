@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const StudentDashboard = () => {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [applicationCount, setApplicationCount] = useState(0);
 
   useEffect(() => {
     if (!loading && role && role !== "student") {
@@ -34,19 +35,32 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (user) {
-      supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("user_id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) setProfile(data);
-        });
+      fetchProfile();
+      fetchApplicationCount();
     }
   }, [user]);
 
+  async function fetchProfile() {
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (data) setProfile(data);
+  }
+
+  async function fetchApplicationCount() {
+    if (!user) return;
+    const { data } = await supabase
+      .from("job_applications")
+      .select("id")
+      .eq("student_id", user.id);
+    setApplicationCount(data?.length || 0);
+  }
+
   const stats = [
-    { label: "Applications Sent", value: "0", icon: FileText, color: "text-accent" },
+    { label: "Applications Sent", value: String(applicationCount), icon: FileText, color: "text-accent" },
     { label: "Interviews Scheduled", value: "0", icon: Calendar, color: "text-success" },
     { label: "Offers Received", value: "0", icon: CheckCircle, color: "text-warning" },
     { label: "Profile Views", value: "0", icon: TrendingUp, color: "text-accent" },
@@ -87,7 +101,9 @@ const StudentDashboard = () => {
             <CardDescription>Explore available placement opportunities</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">View Openings</Button>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/dashboard/jobs">View Openings</Link>
+            </Button>
           </CardContent>
         </Card>
 
