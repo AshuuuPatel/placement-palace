@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      job_applications: {
+        Row: {
+          applied_at: string
+          cover_letter: string | null
+          id: string
+          job_id: string
+          resume_url: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          cover_letter?: string | null
+          id?: string
+          job_id: string
+          resume_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          cover_letter?: string | null
+          id?: string
+          job_id?: string
+          resume_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_postings: {
+        Row: {
+          company_id: string
+          created_at: string
+          deadline: string | null
+          description: string
+          id: string
+          job_type: string | null
+          location: string | null
+          requirements: string[] | null
+          salary_max: number | null
+          salary_min: number | null
+          status: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          deadline?: string | null
+          description: string
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          requirements?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          requirements?: string[] | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: Database["public"]["Enums"]["job_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -84,6 +173,15 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "placement_cell" | "company"
+      application_status:
+        | "pending"
+        | "reviewing"
+        | "shortlisted"
+        | "interview"
+        | "offered"
+        | "rejected"
+        | "withdrawn"
+      job_status: "draft" | "active" | "closed" | "filled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -212,6 +310,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "placement_cell", "company"],
+      application_status: [
+        "pending",
+        "reviewing",
+        "shortlisted",
+        "interview",
+        "offered",
+        "rejected",
+        "withdrawn",
+      ],
+      job_status: ["draft", "active", "closed", "filled"],
     },
   },
 } as const
