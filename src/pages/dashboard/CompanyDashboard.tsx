@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateJobDialog } from "@/components/jobs/CreateJobDialog";
 import { CompanyJobsList } from "@/components/jobs/CompanyJobsList";
+import { CompanyApplicationsList } from "@/components/applications/CompanyApplicationsList";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Users, 
   Briefcase, 
   Calendar, 
   FileText,
-  Search,
-  UserCheck,
-  ClipboardList,
   Send
 } from "lucide-react";
 
@@ -46,7 +43,7 @@ const CompanyDashboard = () => {
       fetchProfile();
       fetchStats();
     }
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   async function fetchProfile() {
     if (!user) return;
@@ -70,7 +67,7 @@ const CompanyDashboard = () => {
 
       const activeJobs = jobsData?.length || 0;
 
-      // Fetch application count for company's jobs
+      // Fetch all jobs for application stats
       const { data: allJobs } = await supabase
         .from("job_postings")
         .select("id")
@@ -79,20 +76,21 @@ const CompanyDashboard = () => {
       const jobIds = allJobs?.map((j) => j.id) || [];
       
       let applications = 0;
+      let interviews = 0;
+      let offers = 0;
+
       if (jobIds.length > 0) {
         const { data: appsData } = await supabase
           .from("job_applications")
-          .select("id")
+          .select("id, status")
           .in("job_id", jobIds);
+
         applications = appsData?.length || 0;
+        interviews = appsData?.filter((a) => a.status === "interview").length || 0;
+        offers = appsData?.filter((a) => a.status === "offered").length || 0;
       }
 
-      setStats({
-        activeJobs,
-        applications,
-        interviews: 0,
-        offers: 0,
-      });
+      setStats({ activeJobs, applications, interviews, offers });
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
@@ -100,14 +98,17 @@ const CompanyDashboard = () => {
 
   function handleJobCreated() {
     setRefreshTrigger((prev) => prev + 1);
+  }
+
+  function handleApplicationsUpdated() {
     fetchStats();
   }
 
   const statsData = [
-    { label: "Active Job Postings", value: String(stats.activeJobs), icon: Briefcase, color: "text-accent" },
-    { label: "Applications Received", value: String(stats.applications), icon: FileText, color: "text-success" },
-    { label: "Interviews Scheduled", value: String(stats.interviews), icon: Calendar, color: "text-warning" },
-    { label: "Offers Extended", value: String(stats.offers), icon: Send, color: "text-accent" },
+    { label: "Active Jobs", value: String(stats.activeJobs), icon: Briefcase, color: "text-accent" },
+    { label: "Applications", value: String(stats.applications), icon: FileText, color: "text-success" },
+    { label: "Interviews", value: String(stats.interviews), icon: Calendar, color: "text-warning" },
+    { label: "Offers", value: String(stats.offers), icon: Send, color: "text-accent" },
   ];
 
   return (
@@ -126,7 +127,7 @@ const CompanyDashboard = () => {
           <Card key={stat.label}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl bg-muted flex items-center justify-center`}>
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
                   <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 <div>
@@ -139,45 +140,21 @@ const CompanyDashboard = () => {
         ))}
       </div>
 
-      {/* Job Postings List */}
-      <div className="mb-8">
-        <CompanyJobsList refreshTrigger={refreshTrigger} />
-      </div>
+      {/* Tabs for Jobs and Applications */}
+      <Tabs defaultValue="jobs" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="jobs">Job Postings</TabsTrigger>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
+        </TabsList>
 
-      {/* Activity Sections */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Recent Applications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No applications yet.</p>
-              <p className="text-sm">Post a job to start receiving applications.</p>
-            </div>
-          </CardContent>
-        </Card>
+        <TabsContent value="jobs">
+          <CompanyJobsList refreshTrigger={refreshTrigger} />
+        </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5" />
-              Shortlisted Candidates
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <UserCheck className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No candidates shortlisted.</p>
-              <p className="text-sm">Review applications to shortlist candidates.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="applications">
+          <CompanyApplicationsList refreshTrigger={refreshTrigger} />
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 };
