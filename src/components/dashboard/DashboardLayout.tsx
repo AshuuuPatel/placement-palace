@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { GraduationCap, LogOut, User, Loader2 } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -49,7 +50,7 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
             <span className="text-lg font-bold text-foreground">PlaceHub</span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
               <User className="w-4 h-4" />
               <span>{user.email}</span>
@@ -57,6 +58,7 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
                 {role?.replace("_", " ")}
               </span>
             </div>
+            <NotificationBell />
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sign Out</span>
