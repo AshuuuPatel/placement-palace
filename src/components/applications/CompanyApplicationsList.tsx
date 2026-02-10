@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/table";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
+import { StudentDetailDialog } from "./StudentDetailDialog";
 import { format } from "date-fns";
-import { Search, Users, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Users, FileText, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ApplicationStatus = "pending" | "reviewing" | "shortlisted" | "interview" | "offered" | "rejected" | "withdrawn";
@@ -257,6 +258,10 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                       <TableCell>{format(new Date(app.applied_at), "MMM d, yyyy")}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <StudentDetailDialog
+                            studentId={app.student_id}
+                            studentName={app.candidate_name}
+                          />
                           {app.cover_letter && (
                             <Button
                               variant="ghost"

@@ -112,11 +112,13 @@ const StudentDashboard = () => {
             <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-2">
               <FileText className="w-6 h-6 text-success" />
             </div>
-            <CardTitle>My Resume</CardTitle>
-            <CardDescription>Build and manage your resume</CardDescription>
+            <CardTitle>My Profile</CardTitle>
+            <CardDescription>Manage your skills, education & resume</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">Edit Resume</Button>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/dashboard/profile">Edit Profile</Link>
+            </Button>
           </CardContent>
         </Card>
 
