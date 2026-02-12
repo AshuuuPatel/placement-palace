@@ -188,10 +188,15 @@ export function StudentDetailDialog({ studentId, studentName }: StudentDetailDia
                     <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1.5">
                       <FileText className="w-4 h-4" /> Resume
                     </h4>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={profile.resume_url} target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4 mr-1" /> Download Resume
-                      </a>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      const filePath = profile.resume_url!.includes("/resumes/")
+                        ? profile.resume_url!.split("/resumes/")[1]
+                        : profile.resume_url!;
+                      if (!filePath) return;
+                      const { data } = await supabase.storage.from("resumes").createSignedUrl(filePath, 60);
+                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                    }}>
+                      <Download className="w-4 h-4 mr-1" /> Download Resume
                     </Button>
                   </div>
                 </>
