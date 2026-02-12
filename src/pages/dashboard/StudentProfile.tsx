@@ -175,7 +175,10 @@ const StudentProfile = () => {
 
     // Delete old resume if exists
     if (profile.resume_url) {
-      const oldPath = profile.resume_url.split("/resumes/")[1];
+      // Handle both old public URLs and new path-only format
+      const oldPath = profile.resume_url.includes("/resumes/")
+        ? profile.resume_url.split("/resumes/")[1]
+        : profile.resume_url;
       if (oldPath) await supabase.storage.from("resumes").remove([oldPath]);
     }
 
@@ -187,21 +190,22 @@ const StudentProfile = () => {
       return;
     }
 
-    const { data: urlData } = supabase.storage.from("resumes").getPublicUrl(filePath);
-
+    // Store the file path, not the public URL (bucket is private)
     await supabase
       .from("profiles")
-      .update({ resume_url: urlData.publicUrl } as any)
+      .update({ resume_url: filePath } as any)
       .eq("user_id", user.id);
 
-    setProfile((p) => ({ ...p, resume_url: urlData.publicUrl }));
+    setProfile((p) => ({ ...p, resume_url: filePath }));
     setUploadingResume(false);
     toast({ title: "Resume uploaded", description: "Your resume has been saved." });
   }
 
   async function handleResumeDelete() {
     if (!user || !profile.resume_url) return;
-    const oldPath = profile.resume_url.split("/resumes/")[1];
+    const oldPath = profile.resume_url.includes("/resumes/")
+      ? profile.resume_url.split("/resumes/")[1]
+      : profile.resume_url;
     if (oldPath) await supabase.storage.from("resumes").remove([oldPath]);
 
     await supabase
@@ -211,6 +215,18 @@ const StudentProfile = () => {
 
     setProfile((p) => ({ ...p, resume_url: null }));
     toast({ title: "Resume removed" });
+  }
+
+  async function getSignedResumeUrl(path: string): Promise<string | null> {
+    // Handle old public URLs - extract path
+    const filePath = path.includes("/resumes/") ? path.split("/resumes/")[1] : path;
+    if (!filePath) return null;
+    const { data, error } = await supabase.storage.from("resumes").createSignedUrl(filePath, 60);
+    if (error) {
+      toast({ title: "Failed to get resume link", variant: "destructive" });
+      return null;
+    }
+    return data.signedUrl;
   }
 
   if (authLoading || loading) {
@@ -440,10 +456,11 @@ const StudentProfile = () => {
                 <div className="border border-border rounded-lg p-4 space-y-3">
                   <p className="text-sm font-medium text-foreground">Resume uploaded ✓</p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={profile.resume_url} target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4 mr-1" /> View
-                      </a>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      const url = await getSignedResumeUrl(profile.resume_url!);
+                      if (url) window.open(url, "_blank");
+                    }}>
+                      <Download className="w-4 h-4 mr-1" /> View
                     </Button>
                     <Button variant="ghost" size="sm" onClick={handleResumeDelete} className="text-destructive">
                       <Trash2 className="w-4 h-4 mr-1" /> Remove
