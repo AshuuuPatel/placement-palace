@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress";
 import { 
   Briefcase, 
   FileText, 
@@ -13,18 +14,26 @@ import {
   TrendingUp,
   Building2,
   CheckCircle,
-  Clock
+  Clock,
+  UserCheck
 } from "lucide-react";
 
-interface Profile {
+interface ProfileFull {
   full_name: string;
   email: string;
+  bio: string | null;
+  phone: string | null;
+  department: string | null;
+  graduation_year: number | null;
+  skills: string[] | null;
+  education: any | null;
+  resume_url: string | null;
 }
 
 const StudentDashboard = () => {
   const { user, role, loading } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileFull | null>(null);
   const [applicationCount, setApplicationCount] = useState(0);
 
   useEffect(() => {
@@ -44,10 +53,10 @@ const StudentDashboard = () => {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, email")
+      .select("full_name, email, bio, phone, department, graduation_year, skills, education, resume_url")
       .eq("user_id", user.id)
       .maybeSingle();
-    if (data) setProfile(data);
+    if (data) setProfile(data as any);
   }
 
   async function fetchApplicationCount() {
@@ -58,6 +67,25 @@ const StudentDashboard = () => {
       .eq("student_id", user.id);
     setApplicationCount(data?.length || 0);
   }
+
+  function getProfileCompletion(): { percent: number; missing: string[] } {
+    if (!profile) return { percent: 0, missing: [] };
+    const checks: { label: string; done: boolean }[] = [
+      { label: "Full name", done: !!profile.full_name },
+      { label: "Phone", done: !!profile.phone },
+      { label: "Department", done: !!profile.department },
+      { label: "Graduation year", done: !!profile.graduation_year },
+      { label: "Bio", done: !!profile.bio },
+      { label: "Skills", done: !!(profile.skills && profile.skills.length > 0) },
+      { label: "Education", done: !!(profile.education && (Array.isArray(profile.education) ? profile.education.length > 0 : false)) },
+      { label: "Resume", done: !!profile.resume_url },
+    ];
+    const done = checks.filter((c) => c.done).length;
+    const missing = checks.filter((c) => !c.done).map((c) => c.label);
+    return { percent: Math.round((done / checks.length) * 100), missing };
+  }
+
+  const completion = getProfileCompletion();
 
   const stats = [
     { label: "Applications Sent", value: String(applicationCount), icon: FileText, color: "text-accent" },
@@ -89,6 +117,32 @@ const StudentDashboard = () => {
           </Card>
         ))}
       </div>
+
+      {/* Profile Completion */}
+      {profile && completion.percent < 100 && (
+        <Card className="mb-8 border-accent/20">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
+                <UserCheck className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-foreground">Profile Completion</p>
+                  <span className="text-sm font-bold text-accent">{completion.percent}%</span>
+                </div>
+                <Progress value={completion.percent} className="h-2" />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Missing: {completion.missing.join(", ")}.{" "}
+              <Link to="/dashboard/profile" className="text-accent hover:underline font-medium">
+                Complete your profile →
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
