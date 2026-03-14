@@ -239,6 +239,17 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
               ))}
             </SelectContent>
           </Select>
+          <Select value={strengthFilter} onValueChange={setStrengthFilter}>
+            <SelectTrigger className="w-full md:w-[160px]">
+              <SelectValue placeholder="Strength" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Strengths</SelectItem>
+              <SelectItem value="strong">Strong (≥80%)</SelectItem>
+              <SelectItem value="moderate">Moderate (50-79%)</SelectItem>
+              <SelectItem value="weak">Weak (&lt;50%)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {filteredApplications.length === 0 ? (
