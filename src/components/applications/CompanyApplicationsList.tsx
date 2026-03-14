@@ -23,7 +23,7 @@ import {
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import { StudentDetailDialog } from "./StudentDetailDialog";
-import { ProfileStrengthBadge, getProfileStrength } from "./ProfileStrengthBadge";
+import { getProfileStrength } from "./ProfileStrengthBadge";
 import { format } from "date-fns";
 import { Search, Users, FileText, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
