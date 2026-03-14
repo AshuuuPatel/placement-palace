@@ -39,6 +39,7 @@ interface Application {
   job_title: string;
   candidate_name: string;
   candidate_email: string;
+  profile_strength: number;
 }
 
 interface CompanyApplicationsListProps {
