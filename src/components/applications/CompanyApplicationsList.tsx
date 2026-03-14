@@ -25,7 +25,7 @@ import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import { StudentDetailDialog } from "./StudentDetailDialog";
 import { getProfileStrength } from "./ProfileStrengthBadge";
 import { format } from "date-fns";
-import { Search, Users, FileText, ChevronDown, ChevronUp, User } from "lucide-react";
+import { Search, Users, FileText, ChevronDown, ChevronUp, User, ArrowUpDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ApplicationStatus = "pending" | "reviewing" | "shortlisted" | "interview" | "offered" | "rejected" | "withdrawn";
@@ -56,6 +56,9 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
   const [jobFilter, setJobFilter] = useState<string>("all");
   const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [strengthFilter, setStrengthFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<string>("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     if (user) {
@@ -145,15 +148,27 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
     }
   }
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      app.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.candidate_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.job_title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    const matchesJob = jobFilter === "all" || app.job_id === jobFilter;
-    return matchesSearch && matchesStatus && matchesJob;
-  });
+  const filteredApplications = applications
+    .filter((app) => {
+      const matchesSearch =
+        app.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.candidate_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.job_title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+      const matchesJob = jobFilter === "all" || app.job_id === jobFilter;
+      const matchesStrength =
+        strengthFilter === "all" ||
+        (strengthFilter === "strong" && app.profile_strength >= 80) ||
+        (strengthFilter === "moderate" && app.profile_strength >= 50 && app.profile_strength < 80) ||
+        (strengthFilter === "weak" && app.profile_strength < 50);
+      return matchesSearch && matchesStatus && matchesJob && matchesStrength;
+    })
+    .sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      if (sortField === "strength") return (a.profile_strength - b.profile_strength) * dir;
+      if (sortField === "name") return a.candidate_name.localeCompare(b.candidate_name) * dir;
+      return (new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()) * dir;
+    });
 
   if (loading) {
     return (
@@ -224,6 +239,17 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
               ))}
             </SelectContent>
           </Select>
+          <Select value={strengthFilter} onValueChange={setStrengthFilter}>
+            <SelectTrigger className="w-full md:w-[160px]">
+              <SelectValue placeholder="Strength" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Strengths</SelectItem>
+              <SelectItem value="strong">Strong (≥80%)</SelectItem>
+              <SelectItem value="moderate">Moderate (50-79%)</SelectItem>
+              <SelectItem value="weak">Weak (&lt;50%)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {filteredApplications.length === 0 ? (
@@ -241,11 +267,23 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Candidate</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("name"); setSortDir(sortField === "name" && sortDir === "asc" ? "desc" : "asc"); }}>
+                      Candidate <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Position</TableHead>
-                  <TableHead>Strength</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("strength"); setSortDir(sortField === "strength" && sortDir === "desc" ? "asc" : "desc"); }}>
+                      Strength <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Applied</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("date"); setSortDir(sortField === "date" && sortDir === "desc" ? "asc" : "desc"); }}>
+                      Applied <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
