@@ -112,6 +112,9 @@ export function StudentDetailDialog({ studentId, studentName }: StudentDetailDia
                 )}
               </div>
 
+              {/* Profile Strength */}
+              <ProfileStrengthBadge profile={profile} />
+
               {/* Contact */}
               <div className="flex flex-wrap gap-4 text-sm">
                 <span className="flex items-center gap-1.5 text-muted-foreground">
