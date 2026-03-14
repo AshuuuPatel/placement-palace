@@ -56,6 +56,9 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
   const [jobFilter, setJobFilter] = useState<string>("all");
   const [jobs, setJobs] = useState<{ id: string; title: string }[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [strengthFilter, setStrengthFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<string>("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     if (user) {
