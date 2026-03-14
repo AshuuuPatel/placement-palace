@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -140,6 +141,26 @@ const StudentDashboard = () => {
                 Complete your profile →
               </Link>
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Profile Complete Congratulations */}
+      {profile && completion.percent === 100 && (
+        <Card className="mb-8 border-success/30 bg-success/5">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-success flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Profile Complete!</p>
+                <p className="text-xs text-muted-foreground">
+                  Your profile is 100% complete. You're all set to apply for jobs!
+                </p>
+              </div>
+              <Badge variant="default" className="bg-success text-white">Completed</Badge>
+            </div>
           </CardContent>
         </Card>
       )}
