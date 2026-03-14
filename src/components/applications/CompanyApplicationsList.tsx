@@ -25,7 +25,7 @@ import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import { StudentDetailDialog } from "./StudentDetailDialog";
 import { getProfileStrength } from "./ProfileStrengthBadge";
 import { format } from "date-fns";
-import { Search, Users, FileText, ChevronDown, ChevronUp, User } from "lucide-react";
+import { Search, Users, FileText, ChevronDown, ChevronUp, User, ArrowUpDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ApplicationStatus = "pending" | "reviewing" | "shortlisted" | "interview" | "offered" | "rejected" | "withdrawn";
