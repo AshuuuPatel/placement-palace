@@ -148,15 +148,27 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
     }
   }
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      app.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.candidate_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.job_title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
-    const matchesJob = jobFilter === "all" || app.job_id === jobFilter;
-    return matchesSearch && matchesStatus && matchesJob;
-  });
+  const filteredApplications = applications
+    .filter((app) => {
+      const matchesSearch =
+        app.candidate_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.candidate_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.job_title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+      const matchesJob = jobFilter === "all" || app.job_id === jobFilter;
+      const matchesStrength =
+        strengthFilter === "all" ||
+        (strengthFilter === "strong" && app.profile_strength >= 80) ||
+        (strengthFilter === "moderate" && app.profile_strength >= 50 && app.profile_strength < 80) ||
+        (strengthFilter === "weak" && app.profile_strength < 50);
+      return matchesSearch && matchesStatus && matchesJob && matchesStrength;
+    })
+    .sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      if (sortField === "strength") return (a.profile_strength - b.profile_strength) * dir;
+      if (sortField === "name") return a.candidate_name.localeCompare(b.candidate_name) * dir;
+      return (new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()) * dir;
+    });
 
   if (loading) {
     return (
