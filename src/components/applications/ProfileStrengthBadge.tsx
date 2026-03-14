@@ -22,7 +22,7 @@ export function getProfileStrength(profile: ProfileData) {
     { label: "Graduation Year", met: !!profile.graduation_year },
     { label: "Bio", met: !!profile.bio },
     { label: "Skills", met: Array.isArray(profile.skills) && profile.skills.length > 0 },
-    { label: "Education", met: Array.isArray(profile.education) && profile.education.length > 0 },
+    { label: "Education", met: Array.isArray(profile.education) && (profile.education as unknown[]).length > 0 },
     { label: "Resume", met: !!profile.resume_url },
   ];
   const met = criteria.filter((c) => c.met).length;
