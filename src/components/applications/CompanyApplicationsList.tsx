@@ -260,6 +260,10 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                       </TableCell>
                       <TableCell>{app.job_title}</TableCell>
                       <TableCell>
+                        <ProfileStrengthBadge profile={{ full_name: app.candidate_name }} compact>
+                          {null}
+                        </ProfileStrengthBadge>
+                      </TableCell>
                         <ApplicationStatusBadge status={app.status} />
                       </TableCell>
                       <TableCell>{format(new Date(app.applied_at), "MMM d, yyyy")}</TableCell>
