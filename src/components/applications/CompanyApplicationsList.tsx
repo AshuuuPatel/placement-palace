@@ -242,6 +242,7 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                 <TableRow>
                   <TableHead>Candidate</TableHead>
                   <TableHead>Position</TableHead>
+                  <TableHead>Strength</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Applied</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
