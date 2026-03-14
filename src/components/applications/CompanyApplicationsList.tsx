@@ -267,11 +267,23 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Candidate</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("name"); setSortDir(sortField === "name" && sortDir === "asc" ? "desc" : "asc"); }}>
+                      Candidate <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Position</TableHead>
-                  <TableHead>Strength</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("strength"); setSortDir(sortField === "strength" && sortDir === "desc" ? "asc" : "desc"); }}>
+                      Strength <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Applied</TableHead>
+                  <TableHead>
+                    <Button variant="ghost" size="sm" className="h-auto p-0 font-medium hover:bg-transparent" onClick={() => { setSortField("date"); setSortDir(sortField === "date" && sortDir === "desc" ? "asc" : "desc"); }}>
+                      Applied <ArrowUpDown className="w-3 h-3 ml-1 inline" />
+                    </Button>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
