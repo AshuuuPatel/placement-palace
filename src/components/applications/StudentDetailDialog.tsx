@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ProfileStrengthBadge } from "./ProfileStrengthBadge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   User,
@@ -110,6 +111,9 @@ export function StudentDetailDialog({ studentId, studentName }: StudentDetailDia
                   <p className="text-sm text-muted-foreground">{profile.department}</p>
                 )}
               </div>
+
+              {/* Profile Strength */}
+              <ProfileStrengthBadge profile={profile} />
 
               {/* Contact */}
               <div className="flex flex-wrap gap-4 text-sm">

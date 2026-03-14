@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,7 @@ import {
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import { StudentDetailDialog } from "./StudentDetailDialog";
+import { getProfileStrength } from "./ProfileStrengthBadge";
 import { format } from "date-fns";
 import { Search, Users, FileText, ChevronDown, ChevronUp, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +40,7 @@ interface Application {
   job_title: string;
   candidate_name: string;
   candidate_email: string;
+  profile_strength: number;
 }
 
 interface CompanyApplicationsListProps {
@@ -111,24 +114,28 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
       const studentIds = [...new Set(appsData.map((a) => a.student_id))];
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("user_id, full_name, email")
+        .select("user_id, full_name, email, phone, department, graduation_year, bio, skills, education, resume_url")
         .in("user_id", studentIds);
 
       const profilesMap = Object.fromEntries(
-        (profilesData || []).map((p) => [p.user_id, { name: p.full_name, email: p.email }])
+        (profilesData || []).map((p) => [p.user_id, p])
       );
 
-      const enrichedApplications: Application[] = appsData.map((app) => ({
-        id: app.id,
-        job_id: app.job_id,
-        student_id: app.student_id,
-        status: app.status as ApplicationStatus,
-        cover_letter: app.cover_letter,
-        applied_at: app.applied_at,
-        job_title: jobTitlesMap[app.job_id] || "Unknown Position",
-        candidate_name: profilesMap[app.student_id]?.name || "Unknown",
-        candidate_email: profilesMap[app.student_id]?.email || "No email",
-      }));
+      const enrichedApplications: Application[] = appsData.map((app) => {
+        const prof = profilesMap[app.student_id];
+        return {
+          id: app.id,
+          job_id: app.job_id,
+          student_id: app.student_id,
+          status: app.status as ApplicationStatus,
+          cover_letter: app.cover_letter,
+          applied_at: app.applied_at,
+          job_title: jobTitlesMap[app.job_id] || "Unknown Position",
+          candidate_name: prof?.full_name || "Unknown",
+          candidate_email: prof?.email || "No email",
+          profile_strength: prof ? getProfileStrength(prof).percent : 0,
+        };
+      });
 
       setApplications(enrichedApplications);
     } catch (error) {
@@ -236,6 +243,7 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                 <TableRow>
                   <TableHead>Candidate</TableHead>
                   <TableHead>Position</TableHead>
+                  <TableHead>Strength</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Applied</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -252,6 +260,14 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                         </div>
                       </TableCell>
                       <TableCell>{app.job_title}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={app.profile_strength >= 80 ? "default" : app.profile_strength >= 50 ? "secondary" : "destructive"}
+                          className="text-xs"
+                        >
+                          {app.profile_strength}%
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <ApplicationStatusBadge status={app.status} />
                       </TableCell>
@@ -287,7 +303,7 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                     </TableRow>
                     {expandedId === app.id && app.cover_letter && (
                       <TableRow key={`${app.id}-letter`}>
-                        <TableCell colSpan={5} className="bg-muted/30">
+                        <TableCell colSpan={6} className="bg-muted/30">
                           <div className="p-4">
                             <p className="text-sm font-medium mb-2">Cover Letter</p>
                             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
