@@ -113,11 +113,11 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
       const studentIds = [...new Set(appsData.map((a) => a.student_id))];
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("user_id, full_name, email")
+        .select("user_id, full_name, email, phone, department, graduation_year, bio, skills, education, resume_url")
         .in("user_id", studentIds);
 
       const profilesMap = Object.fromEntries(
-        (profilesData || []).map((p) => [p.user_id, { name: p.full_name, email: p.email }])
+        (profilesData || []).map((p) => [p.user_id, p])
       );
 
       const enrichedApplications: Application[] = appsData.map((app) => ({
