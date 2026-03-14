@@ -303,7 +303,7 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                     </TableRow>
                     {expandedId === app.id && app.cover_letter && (
                       <TableRow key={`${app.id}-letter`}>
-                        <TableCell colSpan={5} className="bg-muted/30">
+                        <TableCell colSpan={6} className="bg-muted/30">
                           <div className="p-4">
                             <p className="text-sm font-medium mb-2">Cover Letter</p>
                             <p className="text-sm text-muted-foreground whitespace-pre-wrap">
