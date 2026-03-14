@@ -260,7 +260,12 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                       </TableCell>
                       <TableCell>{app.job_title}</TableCell>
                       <TableCell>
-                        <ProfileStrengthBadge profile={{ full_name: app.candidate_name }} compact />
+                        <Badge
+                          variant={app.profile_strength >= 80 ? "default" : app.profile_strength >= 50 ? "secondary" : "destructive"}
+                          className="text-xs"
+                        >
+                          {app.profile_strength}%
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <ApplicationStatusBadge status={app.status} />
