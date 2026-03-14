@@ -10,7 +10,7 @@ interface ProfileData {
   graduation_year?: number | null;
   bio?: string | null;
   skills?: string[] | null;
-  education?: unknown[] | null;
+  education?: unknown | null;
   resume_url?: string | null;
 }
 
