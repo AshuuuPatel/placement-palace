@@ -120,17 +120,21 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
         (profilesData || []).map((p) => [p.user_id, p])
       );
 
-      const enrichedApplications: Application[] = appsData.map((app) => ({
-        id: app.id,
-        job_id: app.job_id,
-        student_id: app.student_id,
-        status: app.status as ApplicationStatus,
-        cover_letter: app.cover_letter,
-        applied_at: app.applied_at,
-        job_title: jobTitlesMap[app.job_id] || "Unknown Position",
-        candidate_name: profilesMap[app.student_id]?.name || "Unknown",
-        candidate_email: profilesMap[app.student_id]?.email || "No email",
-      }));
+      const enrichedApplications: Application[] = appsData.map((app) => {
+        const prof = profilesMap[app.student_id];
+        return {
+          id: app.id,
+          job_id: app.job_id,
+          student_id: app.student_id,
+          status: app.status as ApplicationStatus,
+          cover_letter: app.cover_letter,
+          applied_at: app.applied_at,
+          job_title: jobTitlesMap[app.job_id] || "Unknown Position",
+          candidate_name: prof?.full_name || "Unknown",
+          candidate_email: prof?.email || "No email",
+          profile_strength: prof ? getProfileStrength(prof).percent : 0,
+        };
+      });
 
       setApplications(enrichedApplications);
     } catch (error) {
