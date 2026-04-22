@@ -25,7 +25,8 @@ import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import { StudentDetailDialog } from "./StudentDetailDialog";
 import { getProfileStrength } from "./ProfileStrengthBadge";
 import { format } from "date-fns";
-import { Search, Users, FileText, ChevronDown, ChevronUp, User, ArrowUpDown } from "lucide-react";
+import { Search, Users, FileText, ChevronDown, ChevronUp, User, ArrowUpDown, Download } from "lucide-react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type ApplicationStatus = "pending" | "reviewing" | "shortlisted" | "interview" | "offered" | "rejected" | "withdrawn";
@@ -41,6 +42,7 @@ interface Application {
   candidate_name: string;
   candidate_email: string;
   profile_strength: number;
+  resume_url: string | null;
 }
 
 interface CompanyApplicationsListProps {
@@ -137,6 +139,7 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
           candidate_name: prof?.full_name || "Unknown",
           candidate_email: prof?.email || "No email",
           profile_strength: prof ? getProfileStrength(prof).percent : 0,
+          resume_url: app.resume_url ?? (prof as any)?.resume_url ?? null,
         };
       });
 
