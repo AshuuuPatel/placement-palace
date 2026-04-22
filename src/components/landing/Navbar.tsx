@@ -42,7 +42,7 @@ const Navbar = () => {
             <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-accent-foreground" />
             </div>
-            <span className="text-lg font-bold text-primary-foreground">PlaceHub</span>
+            <span className="text-lg font-bold text-primary-foreground">PlaceSmart</span>
           </Link>
 
           {/* Desktop Navigation */}
