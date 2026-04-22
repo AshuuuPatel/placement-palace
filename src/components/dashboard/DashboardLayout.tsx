@@ -47,7 +47,7 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
             <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-accent-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground">PlaceHub</span>
+            <span className="text-lg font-bold text-foreground">PlaceSmart</span>
           </Link>
 
           <div className="flex items-center gap-3">

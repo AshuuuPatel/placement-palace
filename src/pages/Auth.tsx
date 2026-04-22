@@ -113,7 +113,7 @@ const Auth = () => {
         : error.message;
       toast({ title: "Signup Failed", description: errorMessage, variant: "destructive" });
     } else {
-      toast({ title: "Account Created!", description: "Welcome to PlaceHub!" });
+      toast({ title: "Account Created!", description: "Welcome to PlaceSmart!" });
     }
 
     setIsLoading(false);
@@ -143,7 +143,7 @@ const Auth = () => {
             <div className="mx-auto w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-2">
               <GraduationCap className="w-6 h-6 text-accent-foreground" />
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome to PlaceHub</CardTitle>
+            <CardTitle className="text-2xl font-bold">Welcome to PlaceSmart</CardTitle>
             <CardDescription>Sign in to your account or create a new one</CardDescription>
           </CardHeader>
 

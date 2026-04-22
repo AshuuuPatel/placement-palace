@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-accent-foreground" />
               </div>
-              <span className="text-xl font-bold">PlaceHub</span>
+              <span className="text-xl font-bold">PlaceSmart</span>
             </div>
             <p className="text-primary-foreground/70 text-sm">
               Connecting talent with opportunities. The complete college placement management solution.
@@ -64,7 +64,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 PlaceHub. All rights reserved.
+            © 2024 PlaceSmart. All rights reserved.
           </p>
           <div className="flex gap-6">
             {["Twitter", "LinkedIn", "GitHub"].map((social) => (
