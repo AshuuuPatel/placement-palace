@@ -67,7 +67,7 @@ export function CreateJobDialog({ onJobCreated }: CreateJobDialogProps) {
       location: "",
       job_type: "full-time",
       deadline: "",
-      status: "draft",
+      status: "active",
     },
   });
 
@@ -272,8 +272,8 @@ export function CreateJobDialog({ onJobCreated }: CreateJobDialogProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="draft">Save as Draft</SelectItem>
-                        <SelectItem value="active">Publish Now</SelectItem>
+                        <SelectItem value="active">Active – Publish Now</SelectItem>
+                        <SelectItem value="draft">Draft – Save for Later</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
