@@ -173,6 +173,28 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
       return (new Date(a.applied_at).getTime() - new Date(b.applied_at).getTime()) * dir;
     });
 
+  async function handleDownloadResume(resumeUrl: string | null) {
+    if (!resumeUrl) {
+      toast.error("No resume attached to this application");
+      return;
+    }
+    const filePath = resumeUrl.includes("/resumes/")
+      ? resumeUrl.split("/resumes/")[1]
+      : resumeUrl;
+    if (!filePath) {
+      toast.error("Invalid resume path");
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .createSignedUrl(filePath, 60);
+    if (error || !data?.signedUrl) {
+      toast.error("Failed to load resume");
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
+  }
+
   if (loading) {
     return (
       <Card>
@@ -319,6 +341,17 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                             studentId={app.student_id}
                             studentName={app.candidate_name}
                           />
+                          {app.resume_url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDownloadResume(app.resume_url)}
+                              title="View resume"
+                            >
+                              <Download className="w-4 h-4 mr-1" />
+                              Resume
+                            </Button>
+                          )}
                           {app.cover_letter && (
                             <Button
                               variant="ghost"
@@ -345,11 +378,23 @@ export function CompanyApplicationsList({ refreshTrigger }: CompanyApplicationsL
                     {expandedId === app.id && app.cover_letter && (
                       <TableRow key={`${app.id}-letter`}>
                         <TableCell colSpan={6} className="bg-muted/30">
-                          <div className="p-4">
-                            <p className="text-sm font-medium mb-2">Cover Letter</p>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                              {app.cover_letter}
-                            </p>
+                          <div className="p-4 space-y-3">
+                            <div>
+                              <p className="text-sm font-medium mb-2">Cover Letter</p>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {app.cover_letter}
+                              </p>
+                            </div>
+                            {app.resume_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadResume(app.resume_url)}
+                              >
+                                <Download className="w-4 h-4 mr-1" />
+                                Download Resume
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
